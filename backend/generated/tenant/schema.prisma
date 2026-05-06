@@ -1,0 +1,575 @@
+// ================================================================
+// LearnHub — Per-Tenant Database Schema
+// Each tenant (institute) gets its own database with this schema.
+// Contains all educational data: users, courses, exams, fees, etc.
+// ================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../backend/generated/tenant"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ================================================================
+// USER MANAGEMENT
+// ================================================================
+
+/// Users within a tenant — can be Admin, Teacher, Student, or Parent
+model User {
+  id           String     @id @default(uuid()) @db.Uuid
+  email        String     @unique @db.VarChar(255)
+  passwordHash String     @map("password_hash") @db.Text
+  firstName    String     @map("first_name") @db.VarChar(100)
+  lastName     String     @map("last_name") @db.VarChar(100)
+  phone        String?    @db.VarChar(20)
+  nic          String?    @db.VarChar(20)
+  role         UserRole
+  status       UserStatus @default(ACTIVE)
+  avatarUrl    String?    @map("avatar_url") @db.Text
+
+  // Student-specific fields
+  uniqueId      String? @unique @map("unique_id") @db.VarChar(20)
+  qrCode        String? @map("qr_code") @db.Text
+  birthYear     Int?    @map("birth_year")
+  parentName    String? @map("parent_name") @db.VarChar(200)
+  parentMobile  String? @map("parent_mobile") @db.VarChar(20)
+  grade         String? @db.VarChar(20)
+  classType     String? @map("class_type") @db.VarChar(20)
+  medium        String? @db.VarChar(30)
+  classLocation String? @map("class_location") @db.VarChar(20)
+
+  // Teacher/Student shared field
+  subject String? @db.VarChar(100)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  batchEnrollments          BatchEnrollment[]
+  batchTeachers             BatchTeacher[]
+  submissions               Submission[]
+  attendanceRecords         AttendanceRecord[]
+  examAttempts              ExamAttempt[]
+  manualResults             ManualResult[]      @relation("StudentResults")
+  enteredResults            ManualResult[]      @relation("EnteredByTeacher")
+  feeInvoices               FeeInvoice[]
+  notifications             Notification[]
+  certificates              Certificate[]
+  auditLogs                 AuditLog[]
+  parentLinks               ParentStudentLink[] @relation("StudentLink")
+  childLinks                ParentStudentLink[] @relation("ParentLink")
+  createdAssignments        Assignment[]
+  createdAttendanceSessions AttendanceSession[]
+  createdAnnouncements      Announcement[]
+  gradedSubmissions         Submission[]        @relation("GradedByTeacher")
+  teachingCourses           Course[]            @relation("CourseTeacher")
+
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  TEACHER
+  STUDENT
+  PARENT
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+// ================================================================
+// COURSES & BATCHES
+// ================================================================
+
+/// A course offered by the institute (e.g. "Mathematics Grade 11")
+model Course {
+  id            String       @id @default(uuid()) @db.Uuid
+  title         String       @db.VarChar(255)
+  description   String?      @db.Text
+  code          String?      @unique @db.VarChar(50)
+  coverImageUrl String?      @map("cover_image_url") @db.Text
+  status        CourseStatus @default(ACTIVE)
+  teacherId     String?      @map("teacher_id") @db.Uuid
+  classLocation String?      @map("class_location") @db.VarChar(20)
+  grade         String?      @db.VarChar(20)
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  teacher      User?         @relation("CourseTeacher", fields: [teacherId], references: [id])
+  batches      Batch[]
+  contentItems ContentItem[]
+  certificates Certificate[]
+
+  @@map("courses")
+}
+
+enum CourseStatus {
+  ACTIVE
+  ARCHIVED
+  DRAFT
+}
+
+/// A batch is a specific class section within a course (e.g. "2025 Jan Batch")
+model Batch {
+  id        String      @id @default(uuid()) @db.Uuid
+  courseId  String      @map("course_id") @db.Uuid
+  name      String      @db.VarChar(255)
+  startDate DateTime?   @map("start_date") @db.Date
+  endDate   DateTime?   @map("end_date") @db.Date
+  capacity  Int?
+  status    BatchStatus @default(ACTIVE)
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+
+  course             Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  enrollments        BatchEnrollment[]
+  teachers           BatchTeacher[]
+  timetableSlots     TimetableSlot[]
+  contentItems       ContentItem[]
+  assignments        Assignment[]
+  attendanceSessions AttendanceSession[]
+  exams              Exam[]
+  feeInvoices        FeeInvoice[]
+  certificates       Certificate[]
+  announcements      Announcement[]
+
+  @@map("batches")
+}
+
+enum BatchStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+// ================================================================
+// ENROLLMENTS & ASSIGNMENTS
+// ================================================================
+
+/// Links students to batches — tracks enrollment status and fee status
+model BatchEnrollment {
+  id         String           @id @default(uuid()) @db.Uuid
+  batchId    String           @map("batch_id") @db.Uuid
+  studentId  String           @map("student_id") @db.Uuid
+  enrolledAt DateTime         @default(now()) @map("enrolled_at")
+  status     EnrollmentStatus @default(ACTIVE)
+  feeStatus  FeeStatus        @default(PENDING) @map("fee_status")
+
+  batch   Batch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  student User  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([batchId, studentId])
+  @@map("batch_enrollments")
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  DROPPED
+  COMPLETED
+}
+
+enum FeeStatus {
+  PENDING
+  PAID
+  OVERDUE
+  WAIVED
+}
+
+/// Links teachers to batches
+model BatchTeacher {
+  id         String   @id @default(uuid()) @db.Uuid
+  batchId    String   @map("batch_id") @db.Uuid
+  teacherId  String   @map("teacher_id") @db.Uuid
+  assignedAt DateTime @default(now()) @map("assigned_at")
+
+  batch   Batch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  teacher User  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@unique([batchId, teacherId])
+  @@map("batch_teachers")
+}
+
+// ================================================================
+// TIMETABLE
+// ================================================================
+
+/// Recurring weekly schedule for a batch
+model TimetableSlot {
+  id        String  @id @default(uuid()) @db.Uuid
+  batchId   String  @map("batch_id") @db.Uuid
+  dayOfWeek Int     @map("day_of_week") // 0=Sunday, 6=Saturday
+  startTime String  @map("start_time") @db.VarChar(5) // "HH:mm"
+  endTime   String  @map("end_time") @db.VarChar(5) // "HH:mm"
+  room      String? @db.VarChar(100)
+  meetLink  String? @map("meet_link") @db.Text
+
+  batch              Batch               @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  attendanceSessions AttendanceSession[]
+
+  @@map("timetable_slots")
+}
+
+// ================================================================
+// CONTENT MANAGEMENT
+// ================================================================
+
+/// Learning materials attached to courses/batches
+model ContentItem {
+  id           String      @id @default(uuid()) @db.Uuid
+  courseId     String      @map("course_id") @db.Uuid
+  batchId      String?     @map("batch_id") @db.Uuid
+  title        String      @db.VarChar(255)
+  type         ContentType
+  url          String?     @db.Text
+  bunnyVideoId String?     @map("bunny_video_id") @db.VarChar(100)
+  orderIndex   Int         @default(0) @map("order_index")
+  isVisible    Boolean     @default(true) @map("is_visible")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  batch  Batch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
+
+  @@map("content_items")
+}
+
+enum ContentType {
+  VIDEO
+  PDF
+  DOCUMENT
+  LINK
+  YOUTUBE
+}
+
+// ================================================================
+// ASSIGNMENTS & SUBMISSIONS
+// ================================================================
+
+/// An assignment created by a teacher for a batch
+model Assignment {
+  id          String    @id @default(uuid()) @db.Uuid
+  batchId     String    @map("batch_id") @db.Uuid
+  title       String    @db.VarChar(255)
+  description String?   @db.Text
+  pdfUrl      String?   @map("pdf_url") @db.Text
+  dueDate     DateTime? @map("due_date")
+  maxMarks    Int       @map("max_marks")
+  createdBy   String    @map("created_by") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  batch       Batch        @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  creator     User         @relation(fields: [createdBy], references: [id])
+  submissions Submission[]
+
+  @@map("assignments")
+}
+
+/// A student's submission for an assignment
+model Submission {
+  id           String   @id @default(uuid()) @db.Uuid
+  assignmentId String   @map("assignment_id") @db.Uuid
+  studentId    String   @map("student_id") @db.Uuid
+  fileUrl      String?  @map("file_url") @db.Text
+  submittedAt  DateTime @default(now()) @map("submitted_at")
+  marks        Int?
+  feedback     String?  @db.Text
+  gradedBy     String?  @map("graded_by") @db.Uuid
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student    User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  grader     User?      @relation("GradedByTeacher", fields: [gradedBy], references: [id])
+
+  @@unique([assignmentId, studentId])
+  @@map("submissions")
+}
+
+// ================================================================
+// ATTENDANCE
+// ================================================================
+
+/// An attendance session for a specific date and timetable slot
+model AttendanceSession {
+  id              String   @id @default(uuid()) @db.Uuid
+  batchId         String   @map("batch_id") @db.Uuid
+  timetableSlotId String?  @map("timetable_slot_id") @db.Uuid
+  date            DateTime @db.Date
+  createdBy       String   @map("created_by") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  batch         Batch              @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  timetableSlot TimetableSlot?     @relation(fields: [timetableSlotId], references: [id])
+  creator       User               @relation(fields: [createdBy], references: [id])
+  records       AttendanceRecord[]
+
+  @@map("attendance_sessions")
+}
+
+/// Individual attendance record per student per session
+model AttendanceRecord {
+  id        String           @id @default(uuid()) @db.Uuid
+  sessionId String           @map("session_id") @db.Uuid
+  studentId String           @map("student_id") @db.Uuid
+  status    AttendanceStatus
+
+  session AttendanceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student User              @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, studentId])
+  @@map("attendance_records")
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+// ================================================================
+// EXAMS & RESULTS
+// ================================================================
+
+/// An exam (can be online MCQ or manually graded)
+model Exam {
+  id              String     @id @default(uuid()) @db.Uuid
+  batchId         String     @map("batch_id") @db.Uuid
+  title           String     @db.VarChar(255)
+  type            ExamType
+  date            DateTime?  @db.Date
+  durationMinutes Int?       @map("duration_minutes")
+  maxMarks        Int        @map("max_marks")
+  status          ExamStatus @default(DRAFT)
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+
+  batch         Batch          @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  questions     ExamQuestion[]
+  attempts      ExamAttempt[]
+  manualResults ManualResult[]
+
+  @@map("exams")
+}
+
+enum ExamType {
+  ONLINE_MCQ
+  MANUAL
+}
+
+enum ExamStatus {
+  DRAFT
+  PUBLISHED
+  IN_PROGRESS
+  COMPLETED
+}
+
+/// MCQ question for an online exam
+model ExamQuestion {
+  id            String @id @default(uuid()) @db.Uuid
+  examId        String @map("exam_id") @db.Uuid
+  questionText  String @map("question_text") @db.Text
+  optionA       String @map("option_a") @db.Text
+  optionB       String @map("option_b") @db.Text
+  optionC       String @map("option_c") @db.Text
+  optionD       String @map("option_d") @db.Text
+  correctOption String @map("correct_option") @db.VarChar(1) // A, B, C, or D
+  marks         Int    @default(1)
+
+  exam    Exam         @relation(fields: [examId], references: [id], onDelete: Cascade)
+  answers ExamAnswer[]
+
+  @@map("exam_questions")
+}
+
+/// A student's attempt at an online exam
+model ExamAttempt {
+  id          String    @id @default(uuid()) @db.Uuid
+  examId      String    @map("exam_id") @db.Uuid
+  studentId   String    @map("student_id") @db.Uuid
+  startedAt   DateTime  @default(now()) @map("started_at")
+  submittedAt DateTime? @map("submitted_at")
+  totalMarks  Int?      @map("total_marks")
+  percentage  Decimal?  @db.Decimal(5, 2)
+
+  exam    Exam         @relation(fields: [examId], references: [id], onDelete: Cascade)
+  student User         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  answers ExamAnswer[]
+
+  @@unique([examId, studentId])
+  @@map("exam_attempts")
+}
+
+/// Individual answer for each question in an attempt
+model ExamAnswer {
+  id             String  @id @default(uuid()) @db.Uuid
+  attemptId      String  @map("attempt_id") @db.Uuid
+  questionId     String  @map("question_id") @db.Uuid
+  selectedOption String? @map("selected_option") @db.VarChar(1)
+  isCorrect      Boolean @default(false) @map("is_correct")
+
+  attempt  ExamAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question ExamQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, questionId])
+  @@map("exam_answers")
+}
+
+/// Manually entered results (for non-MCQ exams)
+model ManualResult {
+  id            String  @id @default(uuid()) @db.Uuid
+  examId        String  @map("exam_id") @db.Uuid
+  studentId     String  @map("student_id") @db.Uuid
+  marksObtained Int     @map("marks_obtained")
+  remarks       String? @db.Text
+  enteredBy     String  @map("entered_by") @db.Uuid
+
+  exam      Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  student   User     @relation("StudentResults", fields: [studentId], references: [id], onDelete: Cascade)
+  teacher   User     @relation("EnteredByTeacher", fields: [enteredBy], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([examId, studentId])
+  @@map("manual_results")
+}
+
+// ================================================================
+// FEE MANAGEMENT
+// ================================================================
+
+/// Fee invoice for a student in a batch
+model FeeInvoice {
+  id               String        @id @default(uuid()) @db.Uuid
+  studentId        String        @map("student_id") @db.Uuid
+  batchId          String        @map("batch_id") @db.Uuid
+  amountLkr        Decimal       @map("amount_lkr") @db.Decimal(10, 2)
+  dueDate          DateTime      @map("due_date") @db.Date
+  status           InvoiceStatus @default(PENDING)
+  paymentMethod    String?       @map("payment_method") @db.VarChar(50)
+  paidAt           DateTime?     @map("paid_at")
+  payherePaymentId String?       @map("payhere_payment_id") @db.VarChar(255)
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+
+  student User  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  batch   Batch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@map("fee_invoices")
+}
+
+enum InvoiceStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+  REFUNDED
+}
+
+// ================================================================
+// ANNOUNCEMENTS & NOTIFICATIONS
+// ================================================================
+
+/// Announcements targeted to specific groups
+model Announcement {
+  id         String             @id @default(uuid()) @db.Uuid
+  targetType AnnouncementTarget @map("target_type")
+  targetId   String?            @map("target_id") @db.Uuid
+  title      String             @db.VarChar(255)
+  body       String             @db.Text
+  createdBy  String             @map("created_by") @db.Uuid
+  createdAt  DateTime           @default(now()) @map("created_at")
+
+  creator User   @relation(fields: [createdBy], references: [id])
+  batch   Batch? @relation(fields: [targetId], references: [id])
+
+  @@map("announcements")
+}
+
+enum AnnouncementTarget {
+  ALL
+  BATCH
+  ROLE
+}
+
+/// Per-user notifications
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  type      String   @db.VarChar(50)
+  title     String   @db.VarChar(255)
+  body      String   @db.Text
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+// ================================================================
+// PARENT-STUDENT LINKS
+// ================================================================
+
+/// Associates parent users with their children (student users)
+model ParentStudentLink {
+  id        String @id @default(uuid()) @db.Uuid
+  parentId  String @map("parent_id") @db.Uuid
+  studentId String @map("student_id") @db.Uuid
+
+  parent  User @relation("ParentLink", fields: [parentId], references: [id], onDelete: Cascade)
+  student User @relation("StudentLink", fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([parentId, studentId])
+  @@map("parent_student_links")
+}
+
+// ================================================================
+// CERTIFICATES
+// ================================================================
+
+/// Issued completion certificates
+model Certificate {
+  id             String   @id @default(uuid()) @db.Uuid
+  studentId      String   @map("student_id") @db.Uuid
+  courseId       String   @map("course_id") @db.Uuid
+  batchId        String?  @map("batch_id") @db.Uuid
+  issuedAt       DateTime @default(now()) @map("issued_at")
+  certificateUrl String?  @map("certificate_url") @db.Text
+  uniqueCode     String   @unique @map("unique_code") @db.VarChar(50)
+
+  student User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course  Course @relation(fields: [courseId], references: [id])
+  batch   Batch? @relation(fields: [batchId], references: [id])
+
+  @@map("certificates")
+}
+
+// ================================================================
+// AUDIT LOGGING
+// ================================================================
+
+/// Immutable audit trail for sensitive operations
+model AuditLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String?  @map("user_id") @db.Uuid
+  action       String   @db.VarChar(50) // CREATE, UPDATE, DELETE
+  entityType   String   @map("entity_type") @db.VarChar(100)
+  entityId     String   @map("entity_id") @db.Uuid
+  oldValueJson Json?    @map("old_value_json")
+  newValueJson Json?    @map("new_value_json")
+  ipAddress    String?  @map("ip_address") @db.VarChar(45)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

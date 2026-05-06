@@ -1,0 +1,93 @@
+/* ================================================================
+ * LearnHub Global Styles
+ * Primary: #1E40AF (Blue) — Professional LMS aesthetic
+ * ================================================================ */
+
+@use 'tailwindcss';
+@use '@angular/material' as mat;
+
+/* ----------------------------------------------------------------
+ * Angular Material Theme — Custom LearnHub palette
+ * ---------------------------------------------------------------- */
+html {
+  height: 100%;
+  @include mat.theme((
+    color: (
+      primary: mat.$blue-palette,
+      tertiary: mat.$violet-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+}
+
+body {
+  color-scheme: light;
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+  margin: 0;
+  height: 100%;
+}
+
+/* ----------------------------------------------------------------
+ * Custom CSS Variables (LearnHub Design Tokens)
+ * ---------------------------------------------------------------- */
+:root {
+  --lh-primary: #1E40AF;
+  --lh-primary-light: #3B82F6;
+  --lh-primary-dark: #1E3A8A;
+  --lh-accent: #7C3AED;
+  --lh-success: #059669;
+  --lh-warning: #D97706;
+  --lh-danger: #DC2626;
+  --lh-surface: #F8FAFC;
+  --lh-border: #E2E8F0;
+  --lh-text-primary: #0F172A;
+  --lh-text-secondary: #64748B;
+  --lh-sidebar-width: 260px;
+  --lh-header-height: 64px;
+  --lh-border-radius: 8px;
+}
+
+/* ----------------------------------------------------------------
+ * Global Utility Classes
+ * ---------------------------------------------------------------- */
+.lh-page-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.lh-card {
+  background: white;
+  border-radius: var(--lh-border-radius);
+  border: 1px solid var(--lh-border);
+  padding: 24px;
+}
+
+.lh-section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--lh-text-primary);
+  margin-bottom: 16px;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}

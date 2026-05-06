@@ -1,0 +1,47 @@
+# ================================================================
+# LearnHub — Git Ignore
+# ================================================================
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+build/
+.angular/
+
+# Environment files (contain secrets)
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# Docker volumes
+postgres_data/
+redis_data/
+
+# SSL certificates (should not be in git)
+docker/nginx/ssl/
+
+# Prisma generated clients
+backend/node_modules/@prisma/client/master/
+backend/node_modules/@prisma/client/tenant/
+
+# Test coverage
+coverage/

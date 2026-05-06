@@ -1,1 +1,0 @@
-# LearnMate-Multitenant-LMS-Platform

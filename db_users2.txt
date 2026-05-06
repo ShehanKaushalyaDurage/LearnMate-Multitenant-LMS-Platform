@@ -1,0 +1,8 @@
+         email          | status |  role   
+------------------------+--------+---------
+ shehankmusic@gmail.com | ACTIVE | ADMIN
+ shashini@learnhub.lk   | ACTIVE | TEACHER
+ admin@learnhub.lk      | ACTIVE | TEACHER
+ shehan@learnhub.lk     | ACTIVE | TEACHER
+(4 rows)
+

@@ -1,0 +1,154 @@
+// ================================================================
+// LearnHub — Master Database Schema
+// This database manages tenants, plans, subscriptions, and
+// platform-level administration. One instance per deployment.
+// ================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../backend/generated/master"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ----------------------------------------------------------------
+// Tenant Registry
+// Each tenant represents an educational institute on the platform.
+// The slug is used for subdomain routing: {slug}.learnhub.lk
+// ----------------------------------------------------------------
+model Tenant {
+  id                  String       @id @default(uuid()) @db.Uuid
+  name                String       @db.VarChar(255)
+  slug                String       @unique @db.VarChar(100)
+  dbName              String       @map("db_name") @db.VarChar(100)
+  dbHost              String       @map("db_host") @db.VarChar(255)
+  dbPort              Int          @default(5432) @map("db_port")
+  dbUser              String       @map("db_user") @db.VarChar(100)
+  dbPasswordEncrypted String       @map("db_password_encrypted") @db.Text
+  planId              String?      @map("plan_id") @db.Uuid
+  status              TenantStatus @default(ACTIVE)
+  logoUrl             String?      @map("logo_url") @db.Text
+  contactEmail        String?      @map("contact_email") @db.VarChar(255)
+  contactPhone        String?      @map("contact_phone") @db.VarChar(20)
+  address             String?      @db.Text
+  createdAt           DateTime     @default(now()) @map("created_at")
+  updatedAt           DateTime     @updatedAt @map("updated_at")
+
+  plan          Plan?          @relation(fields: [planId], references: [id])
+  subscriptions Subscription[]
+  invoices      Invoice[]
+
+  @@map("tenants")
+}
+
+enum TenantStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING
+  DEACTIVATED
+}
+
+// ----------------------------------------------------------------
+// Subscription Plans
+// Defines what each pricing tier includes.
+// ----------------------------------------------------------------
+model Plan {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String   @db.VarChar(100)
+  maxStudents  Int      @map("max_students")
+  maxTeachers  Int      @map("max_teachers")
+  maxCourses   Int      @map("max_courses")
+  priceLkr     Decimal  @map("price_lkr") @db.Decimal(10, 2)
+  featuresJson Json?    @map("features_json")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  tenants       Tenant[]
+  subscriptions Subscription[]
+  invoices      Invoice[]
+
+  @@map("plans")
+}
+
+// ----------------------------------------------------------------
+// Subscriptions
+// Tracks billing periods and payment gateway references.
+// ----------------------------------------------------------------
+model Subscription {
+  id                    String             @id @default(uuid()) @db.Uuid
+  tenantId              String             @map("tenant_id") @db.Uuid
+  planId                String             @map("plan_id") @db.Uuid
+  status                SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart    DateTime           @map("current_period_start")
+  currentPeriodEnd      DateTime           @map("current_period_end")
+  payhereSubscriptionId String?            @map("payhere_subscription_id") @db.VarChar(255)
+  createdAt             DateTime           @default(now()) @map("created_at")
+  updatedAt             DateTime           @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  plan   Plan   @relation(fields: [planId], references: [id])
+
+  @@map("subscriptions")
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  TRIALING
+}
+
+// ----------------------------------------------------------------
+// Platform Admins (Super Admins)
+// These are SaaS owner accounts, NOT tenant-level admins.
+// ----------------------------------------------------------------
+model PlatformAdmin {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique @db.VarChar(255)
+  passwordHash String   @map("password_hash") @db.Text
+  firstName    String   @map("first_name") @db.VarChar(100)
+  lastName     String   @map("last_name") @db.VarChar(100)
+  role         String   @default("SUPER_ADMIN") @db.VarChar(50)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("platform_admins")
+}
+
+// ----------------------------------------------------------------
+// Global Settings
+// Platform-wide configurations (SaaS level)
+// ----------------------------------------------------------------
+model GlobalSetting {
+  id        String   @id @default(uuid()) @db.Uuid
+  key       String   @unique @db.VarChar(100)
+  value     String   @db.Text
+  category  String?  @db.VarChar(50)
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("global_settings")
+}
+
+// ----------------------------------------------------------------
+// Platform Invoices
+// Tracks billing history for tenant subscriptions.
+// ----------------------------------------------------------------
+model Invoice {
+  id          String    @id @default(uuid()) @db.Uuid
+  tenantId    String    @map("tenant_id") @db.Uuid
+  amount      Decimal   @db.Decimal(10, 2)
+  currency    String    @default("LKR") @db.VarChar(10)
+  status      String    @default("PAID") // PAID, PENDING, OVERDUE
+  billingDate DateTime  @default(now()) @map("billing_date")
+  dueDate     DateTime? @map("due_date")
+  paidAt      DateTime? @map("paid_at")
+  planId      String    @map("plan_id") @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  plan   Plan   @relation(fields: [planId], references: [id])
+
+  @@map("platform_invoices")
+}

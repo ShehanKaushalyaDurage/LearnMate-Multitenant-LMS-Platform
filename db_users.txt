@@ -1,0 +1,8 @@
+         email          |  role   | first_name 
+------------------------+---------+------------
+ shehankmusic@gmail.com | ADMIN   | Shehan
+ shashini@learnhub.lk   | TEACHER | Shashini
+ admin@learnhub.lk      | TEACHER | Shehan
+ shehan@learnhub.lk     | TEACHER | Shehan
+(4 rows)
+

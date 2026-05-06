@@ -1,0 +1,50 @@
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/tenant/content/:id, PATCH} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/tenant/content/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mPlatformController {/api/platform}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/platform/stats, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/platform/plans, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/platform/plans/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/platform/plans, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/platform/plans/:id, PATCH} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/platform/tenants/:tenantId/subscriptions, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/platform/subscriptions, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/platform/subscriptions/:id/status, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/platform/tenants, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/platform/tenants, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/platform/tenants/:id, PATCH} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/platform/tenants/:id/plan, PATCH} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/platform/tenants/:id/features, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/platform/tenants/:id/features, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/platform/admins, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/platform/users, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/platform/billing/invoices, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/platform/audit-logs, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mPlatformSettingsController {/api/platform/settings}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/platform/settings, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/platform/settings, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuditLogController {/api/tenant/audit-logs}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/tenant/audit-logs, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[MasterPrismaService] [39m[32m✅ Connected to master database[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +7ms[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[Bootstrap] [39m[32m🚀 LearnHub API running on port 3000 [development][39m
+[32m[Nest] 1  - [39m03/03/2026, 11:10:52 AM [32m    LOG[39m [38;5;3m[Bootstrap] [39m[32m📡 CORS: all origins (dev)[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:11:25 AM [32m    LOG[39m [38;5;3m[AuthService] [39m[32m✅ Platform login: admin@learnhub.lk[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:11:53 AM [32m    LOG[39m [38;5;3m[TenantsService] [39m[32m📦 Provisioning new tenant: shehan (shehan)[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:11:53 AM [32m    LOG[39m [38;5;3m[TenantsService] [39m[32m✅ Database created: learnhub_tenant_shehan[39m
+[95m[Nest] 1  - [39m03/03/2026, 11:11:53 AM [95m  DEBUG[39m [38;5;3m[TenantMigrationsService] [39m[95mConnected to tenant database for migrations[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:11:53 AM [32m    LOG[39m [38;5;3m[TenantMigrationsService] [39m[32mApplying 1 migration(s)...[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:11:53 AM [32m    LOG[39m [38;5;3m[TenantMigrationsService] [39m[32m✅ Applied migration: 20260226100051_init[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:11:53 AM [32m    LOG[39m [38;5;3m[TenantMigrationsService] [39m[32m🎉 All migrations applied successfully[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:11:53 AM [32m    LOG[39m [38;5;3m[TenantsService] [39m[32m✅ Migrations applied to: learnhub_tenant_shehan[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:11:53 AM [32m    LOG[39m [38;5;3m[TenantPrismaService] [39m[32m🔗 Connected to tenant database: learnhub_tenant_shehan (provisioning-shehan)[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:11:53 AM [32m    LOG[39m [38;5;3m[TenantsService] [39m[32m✅ Admin user seeded: shehankmusic@gmail.com[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:11:53 AM [32m    LOG[39m [38;5;3m[TenantsService] [39m[32m🎉 Tenant provisioned successfully: shehan (da927f3b-bbd3-4e0f-a4cc-7131ef3b42cc)[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:12:36 AM [32m    LOG[39m [38;5;3m[TenantPrismaService] [39m[32m🔗 Connected to tenant database: learnhub_tenant_shehan (da927f3b-bbd3-4e0f-a4cc-7131ef3b42cc)[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:12:37 AM [32m    LOG[39m [38;5;3m[AuthService] [39m[32m✅ Tenant login: shehankmusic@gmail.com @ shehan[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:30:47 AM [32m    LOG[39m [38;5;3m[TenantPrismaService] [39m[32m🧹 Evicted idle tenant connection: provisioning-shehan[39m
+[32m[Nest] 1  - [39m03/03/2026, 11:30:47 AM [32m    LOG[39m [38;5;3m[TenantPrismaService] [39m[32m🧹 Evicted idle tenant connection: da927f3b-bbd3-4e0f-a4cc-7131ef3b42cc[39m
+[32m[Nest] 1  - [39m03/03/2026, 12:24:56 PM [32m    LOG[39m [38;5;3m[TenantPrismaService] [39m[32m🔗 Connected to tenant database: learnhub_tenant_shehan (da927f3b-bbd3-4e0f-a4cc-7131ef3b42cc)[39m
+[32m[Nest] 1  - [39m03/03/2026, 12:26:03 PM [32m    LOG[39m [38;5;3m[UsersService] [39m[32m✅ Created user: shashini@learnhub.lk (TEACHER)[39m
+[32m[Nest] 1  - [39m03/03/2026, 12:26:29 PM [32m    LOG[39m [38;5;3m[AuthService] [39m[32m✅ Tenant login: shehankmusic@gmail.com @ shehan[39m
+[32m[Nest] 1  - [39m03/03/2026, 12:26:53 PM [32m    LOG[39m [38;5;3m[UsersService] [39m[32m✅ Created user: admin@learnhub.lk (TEACHER)[39m
+[32m[Nest] 1  - [39m03/03/2026, 12:28:46 PM [32m    LOG[39m [38;5;3m[UsersService] [39m[32m✅ Created user: shehan@learnhub.lk (TEACHER)[39m
